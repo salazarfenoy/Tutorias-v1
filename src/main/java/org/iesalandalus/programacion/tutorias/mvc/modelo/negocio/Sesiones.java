@@ -1,52 +1,34 @@
 package org.iesalandalus.programacion.tutorias.mvc.modelo.negocio;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 import javax.naming.OperationNotSupportedException;
 
+import org.iesalandalus.programacion.tutorias.mvc.modelo.dominio.Profesor;
 import org.iesalandalus.programacion.tutorias.mvc.modelo.dominio.Sesion;
 import org.iesalandalus.programacion.tutorias.mvc.modelo.dominio.Tutoria;
 
 public class Sesiones {
-	private int capacidad;
-	private int tamano;
-	private Sesion[] coleccionSesiones;
 
-	public Sesiones(int capacidad) {
-		if (capacidad <= 0) {
-			throw new IllegalArgumentException("ERROR: La capacidad debe ser mayor que cero.");
-		}
-		coleccionSesiones = new Sesion[capacidad];
-		this.capacidad = capacidad;
-		tamano = 0;
-	}
+	private List<Sesion> coleccionSesiones;
 
-	private boolean capacidadSuperada(int indice) {
-		return indice >= capacidad;
+	public Sesiones() {
+
+		coleccionSesiones = new ArrayList<>();
 
 	}
 
-	private boolean tamanoSuperado(int indice) {
-		return indice >= tamano;
-
+	public int getTamano() {
+		return coleccionSesiones.size();
 	}
 
-	private int buscarIndice(Sesion sesion) {
-		int indice = 0;
-		boolean sesionEncontrada = false;
-		while (!tamanoSuperado(indice) && !sesionEncontrada) {
-			if (coleccionSesiones[indice].equals(sesion)) {
-				sesionEncontrada = true;
-			} else {
-				indice++;
-			}
-		}
-		return indice;
+	private List<Sesion> copiaProfundaSesiones() {
+		List<Sesion> copiaSesiones = new ArrayList<>();
 
-	}
-
-	private Sesion[] copiaProfundaSesiones() {
-		Sesion[] copiaSesiones = new Sesion[coleccionSesiones.length];
-		for (int i = 0; i < coleccionSesiones.length && coleccionSesiones[i] != null; i++) {
-			copiaSesiones[i] = new Sesion(coleccionSesiones[i]);
+		for (Sesion sesion : coleccionSesiones) {
+			copiaSesiones.add(new Sesion(sesion));
 		}
 
 		return copiaSesiones;
@@ -58,14 +40,10 @@ public class Sesiones {
 			throw new NullPointerException("ERROR: No se puede insertar una sesión nula.");
 		}
 
-		int indice = buscarIndice(sesion);
-		if (capacidadSuperada(indice)) {
-			throw new OperationNotSupportedException("ERROR: No se aceptan más sesiones.");
-		}
+		int indice = coleccionSesiones.indexOf(sesion);
 
-		if (tamanoSuperado(indice)) {
-			coleccionSesiones[indice] = new Sesion(sesion);
-			tamano++;
+		if (indice == -1) {
+			coleccionSesiones.add(new Sesion(sesion));
 		} else {
 			throw new OperationNotSupportedException("ERROR: Ya existe una sesión con esa fecha.");
 		}
@@ -76,60 +54,52 @@ public class Sesiones {
 		if (sesion == null) {
 			throw new IllegalArgumentException("ERROR: No se puede buscar una sesión nula.");
 		}
-		int indice = buscarIndice(sesion);
-		if (tamanoSuperado(indice)) {
+		int indice = coleccionSesiones.indexOf(sesion);
+		if (indice == -1) {
 			return null;
 		} else {
-			return new Sesion(coleccionSesiones[indice]);
+			return new Sesion(coleccionSesiones.get(indice));
 		}
 
-	}
-
-	private void desplazarUnaPosicionHaciaIzquierda(int indice) {
-
-		for (int i = indice; !tamanoSuperado(i); i++) {
-			coleccionSesiones[i] = coleccionSesiones[i + 1];
-		}
-		tamano--;
 	}
 
 	public void borrar(Sesion sesion) throws OperationNotSupportedException {
 		if (sesion == null) {
 			throw new IllegalArgumentException("ERROR: No se puede borrar una sesión nula.");
 		}
-		int indice = buscarIndice(sesion);
+		int indice = coleccionSesiones.indexOf(sesion);
 
-		if (!tamanoSuperado(indice)) {
-			desplazarUnaPosicionHaciaIzquierda(indice);
-		} else {
+		if (indice == -1) {
 			throw new OperationNotSupportedException("ERROR: No existe ninguna sesión con esa fecha.");
+		} else {
+			coleccionSesiones.remove(indice);
 		}
 
 	}
 
-	public int getCapacidad() {
-		return capacidad;
-	}
+	public List<Sesion> get(Tutoria tutoria) {
+		if (tutoria == null) {
+			throw new NullPointerException("ERROR: La tutoría no puede ser nula.");
+		}
+		List<Sesion> copiaSesionesTutoria = new ArrayList<>();
 
-	public int getTamano() {
-		return tamano;
-	}
-
-	public Sesion[] get(Tutoria tutoria) {
-		int j = 0;
-		Sesion[] copiaSesionesTutoria = new Sesion[tamano];
-		for (int i = 0; i < tamano; i++) {
-			if (coleccionSesiones[i].getTutoria().equals(tutoria)) {
-				copiaSesionesTutoria[j] = new Sesion(coleccionSesiones[i]);
-				j++;
+		for (Sesion sesion : coleccionSesiones) {
+			if (sesion.getTutoria().equals(tutoria)) {
+				copiaSesionesTutoria.add(new Sesion(sesion));
 			}
 		}
+		copiaSesionesTutoria.sort(Comparator.comparing(Sesion::getFecha));
+
 		return copiaSesionesTutoria;
 
 	}
 
-	public Sesion[] get() {
-		return copiaProfundaSesiones();
+	public List<Sesion> get() {
+		List<Sesion> sesionesOrdenadas = copiaProfundaSesiones();
+		Comparator<Profesor> comparadorProfesor = Comparator.comparing(Profesor::getDni);
+		Comparator<Tutoria> comparadorTutorias= Comparator.comparing(Tutoria::getProfesor, comparadorProfesor).thenComparing(Tutoria::getNombre);
+		sesionesOrdenadas.sort(Comparator.comparing(Sesion::getTutoria,comparadorTutorias).thenComparing(Sesion::getFecha));
+		return sesionesOrdenadas;
 	}
 
 }

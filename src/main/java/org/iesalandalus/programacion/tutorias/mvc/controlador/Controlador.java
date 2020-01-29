@@ -1,6 +1,8 @@
 package org.iesalandalus.programacion.tutorias.mvc.controlador;
 
 
+import java.util.List;
+
 import javax.naming.OperationNotSupportedException;
 
 
@@ -100,39 +102,39 @@ public class Controlador {
 		modelo.borrar(cita);
 	}
 
-	public Alumno[] getAlumnos() {
+	public List<Alumno> getAlumnos() {
 		return modelo.getAlumnos();
 	}
 
-	public Profesor[] getProfesores() {
+	public List<Profesor> getProfesores() {
 		return modelo.getProfesores();
 	}
 
-	public Tutoria[] getTutorias() {
+	public List<Tutoria> getTutorias() {
 		return modelo.getTutorias();
 	}
 
-	public Tutoria[] getTutorias(Profesor profesor) {
+	public List<Tutoria> getTutorias(Profesor profesor) {
 		return modelo.getTutorias(profesor);
 	}
 
-	public Sesion[] getSesiones() {
+	public List<Sesion> getSesiones() {
 		return modelo.getSesiones();
 	}
 
-	public Sesion[] getSesiones(Tutoria tutoria) {
+	public List<Sesion> getSesiones(Tutoria tutoria) {
 		return modelo.getSesiones(tutoria);
 	}
 
-	public Cita[] getCitas() {
+	public List<Cita> getCitas() {
 		return modelo.getCitas();
 	}
 
-	public Cita[] getCitas(Sesion sesion) {
+	public List<Cita> getCitas(Sesion sesion) {
 		return modelo.getCitas(sesion);
 	}
 
-	public Cita[] getCitas(Alumno alumno) {
+	public List<Cita> getCitas(Alumno alumno) {
 		return modelo.getCitas(alumno);
 	}
 

@@ -1,5 +1,7 @@
 package org.iesalandalus.programacion.tutorias.mvc.modelo;
 
+import java.util.List;
+
 import javax.naming.OperationNotSupportedException;
 
 import org.iesalandalus.programacion.tutorias.mvc.modelo.dominio.Alumno;
@@ -15,7 +17,7 @@ import org.iesalandalus.programacion.tutorias.mvc.modelo.negocio.Tutorias;
 
 public class Modelo {
 
-	private static final int CAPACIDAD = 20;
+
 	private Alumnos alumnos;
 	private Profesores profesores;
 	private Tutorias tutorias;
@@ -23,11 +25,12 @@ public class Modelo {
 	private Citas citas;
 
 	public Modelo() {
-		citas = new Citas(CAPACIDAD);
-		alumnos = new Alumnos(CAPACIDAD);
-		profesores = new Profesores(CAPACIDAD);
-		tutorias = new Tutorias(CAPACIDAD);
-		sesiones = new Sesiones(CAPACIDAD);
+		alumnos = new Alumnos();
+		profesores = new Profesores();
+		tutorias = new Tutorias();
+		sesiones = new Sesiones();
+		citas = new Citas();
+
 	}
 
 	public void insertar(Alumno alumno) throws OperationNotSupportedException {
@@ -65,7 +68,7 @@ public class Modelo {
 
 		Tutoria tutoria = tutorias.buscar(sesion.getTutoria());
 		if (tutoria == null) {
-			throw new OperationNotSupportedException("ERROR: No se puede insertar una sesión con una tutoría nula.");
+			throw new OperationNotSupportedException("ERROR: No existe la tutoría de esta sesión.");
 		}
 		sesiones.insertar(new Sesion(tutoria, sesion.getFecha(), sesion.getHoraInicio(), sesion.getHoraFin(),
 				sesion.getMinutosDuracion()));
@@ -77,15 +80,17 @@ public class Modelo {
 		if (cita == null) {
 			throw new NullPointerException("ERROR: No se puede insertar una cita nula.");
 		}
-		Sesion sesion = sesiones.buscar(cita.getSesion());
-		if (sesion == null) {
-			throw new OperationNotSupportedException("ERROR: No se puede insertar una cita con una sesión nula.");
-		}
+
 		Alumno alumno = alumnos.buscar(cita.getAlumno());
 
 		if (alumno == null) {
-			throw new OperationNotSupportedException("ERROR: No se puede insertar una cita con un alumno nulo.");
+			throw new OperationNotSupportedException("ERROR: No existe el alumno de esta cita.");
 		}
+		Sesion sesion = sesiones.buscar(cita.getSesion());
+		if (sesion == null) {
+			throw new OperationNotSupportedException("ERROR: No existe la sesión de esta cita.");
+		}
+
 		citas.insertar(new Cita(alumno, sesion, cita.getHora()));
 
 	}
@@ -112,23 +117,36 @@ public class Modelo {
 	}
 
 	public void borrar(Alumno alumno) throws OperationNotSupportedException {
+		List<Cita> citasAlumno = citas.get(alumno);
+		for (Cita cita: citasAlumno) {
+			citas.borrar(cita);
+		}
 		alumnos.borrar(alumno);
 
 	}
 
 	public void borrar(Profesor profesor) throws OperationNotSupportedException {
-
+		List<Tutoria> tutoriasProfesor = tutorias.get(profesor);
+		for (Tutoria tutoria: tutoriasProfesor) {
+			borrar(tutoria);
+		}
 		profesores.borrar(profesor);
 
 	}
 
 	public void borrar(Tutoria tutoria) throws OperationNotSupportedException {
-
+		List<Sesion> sesionesTutoria = sesiones.get(tutoria);
+		for (Sesion sesion: sesionesTutoria) {
+			borrar(sesion);
+		}
 		tutorias.borrar(tutoria);
 	}
 
 	public void borrar(Sesion sesion) throws OperationNotSupportedException {
-
+		List<Cita> citasSesion = citas.get(sesion);
+		for (Cita cita: citasSesion) {
+			borrar(cita);
+		}
 		sesiones.borrar(sesion);
 
 	}
@@ -139,40 +157,40 @@ public class Modelo {
 
 	}
 
-	public Alumno[] getAlumnos() {
+	public List<Alumno> getAlumnos() {
 		return alumnos.get();
 
 	}
 
-	public Profesor[] getProfesores() {
+	public List<Profesor> getProfesores() {
 		return profesores.get();
 	}
 
-	public Tutoria[] getTutorias() {
+	public List<Tutoria> getTutorias() {
 		return tutorias.get();
 	}
 
-	public Tutoria[] getTutorias(Profesor profesor) {
+	public List<Tutoria> getTutorias(Profesor profesor) {
 		return tutorias.get(profesor);
 	}
 
-	public Sesion[] getSesiones() {
+	public List<Sesion> getSesiones() {
 		return sesiones.get();
 	}
 
-	public Sesion[] getSesiones(Tutoria tutoria) {
+	public List<Sesion> getSesiones(Tutoria tutoria) {
 		return sesiones.get(tutoria);
 	}
 
-	public Cita[] getCitas() {
+	public List<Cita> getCitas() {
 		return citas.get();
 	}
 
-	public Cita[] getCitas(Sesion sesion) {
+	public List<Cita> getCitas(Sesion sesion) {
 		return citas.get(sesion);
 	}
 
-	public Cita[] getCitas(Alumno alumno) {
+	public List<Cita> getCitas(Alumno alumno) {
 		return citas.get(alumno);
 	}
 

@@ -1,5 +1,9 @@
 package org.iesalandalus.programacion.tutorias.mvc.modelo.negocio;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 import javax.naming.OperationNotSupportedException;
 
 import org.iesalandalus.programacion.tutorias.mvc.modelo.dominio.Profesor;
@@ -7,47 +11,23 @@ import org.iesalandalus.programacion.tutorias.mvc.modelo.dominio.Tutoria;
 
 public class Tutorias {
 
-	private int capacidad;
-	private int tamano;
-	private Tutoria[] coleccionTutorias;
+	private List<Tutoria> coleccionTutorias;
 
-	public Tutorias(int capacidad) {
-		if (capacidad <= 0) {
-			throw new IllegalArgumentException("ERROR: La capacidad debe ser mayor que cero.");
-		}
-		coleccionTutorias = new Tutoria[capacidad];
-		this.capacidad = capacidad;
-		tamano = 0;
-	}
+	public Tutorias() {
 
-	private boolean capacidadSuperada(int indice) {
-		return indice >= capacidad;
+		coleccionTutorias = new ArrayList<>();
 
 	}
 
-	private boolean tamanoSuperado(int indice) {
-		return indice >= tamano;
-
+	public int getTamano() {
+		return coleccionTutorias.size();
 	}
 
-	private int buscarIndice(Tutoria tutoria) {
-		int indice = 0;
-		boolean tutoriaEncontrada = false;
-		while (!tamanoSuperado(indice) && !tutoriaEncontrada) {
-			if (coleccionTutorias[indice].equals(tutoria)) {
-				tutoriaEncontrada = true;
-			} else {
-				indice++;
-			}
-		}
-		return indice;
+	private List<Tutoria> copiaProfundaTutorias() {
+		List<Tutoria> copiaTutorias = new ArrayList<>();
 
-	}
-
-	private Tutoria[] copiaProfundaTutorias() {
-		Tutoria[] copiaTutorias = new Tutoria[coleccionTutorias.length];
-		for (int i = 0; i < coleccionTutorias.length && coleccionTutorias[i] != null; i++) {
-			copiaTutorias[i] = new Tutoria(coleccionTutorias[i]);
+		for (Tutoria tutoria : coleccionTutorias) {
+			copiaTutorias.add(new Tutoria(tutoria));
 		}
 
 		return copiaTutorias;
@@ -59,16 +39,13 @@ public class Tutorias {
 			throw new NullPointerException("ERROR: No se puede insertar una tutoría nula.");
 		}
 
-		int indice = buscarIndice(tutoria);
-		if (capacidadSuperada(indice)) {
-			throw new OperationNotSupportedException("ERROR: No se aceptan más tutorías.");
-		}
+		int indice = coleccionTutorias.indexOf(tutoria);
 
-		if (tamanoSuperado(indice)) {
-			coleccionTutorias[indice] = new Tutoria(tutoria);
-			tamano++;
+		if (indice == -1) {
+			coleccionTutorias.add(new Tutoria(tutoria));
 		} else {
 			throw new OperationNotSupportedException("ERROR: Ya existe una tutoría con ese identificador.");
+
 		}
 
 	}
@@ -77,62 +54,53 @@ public class Tutorias {
 		if (tutoria == null) {
 			throw new IllegalArgumentException("ERROR: No se puede buscar una tutoría nula.");
 		}
-		int indice = buscarIndice(tutoria);
-		if (tamanoSuperado(indice)) {
-			tutoria = null;
+		int indice = coleccionTutorias.indexOf(tutoria);
+
+		if (indice == -1) {
+			return null;
 		} else {
-			tutoria = new Tutoria(coleccionTutorias[indice]);
+			return new Tutoria(coleccionTutorias.get(indice));
 		}
 
-		return tutoria;
-
-	}
-
-	private void desplazarUnaPosicionHaciaIzquierda(int indice) {
-
-		for (int i = indice; !tamanoSuperado(i); i++) {
-			coleccionTutorias[i] = coleccionTutorias[i + 1];
-		}
-		tamano--;
 	}
 
 	public void borrar(Tutoria tutoria) throws OperationNotSupportedException {
 		if (tutoria == null) {
 			throw new IllegalArgumentException("ERROR: No se puede borrar una tutoría nula.");
 		}
-		int indice = buscarIndice(tutoria);
+		int indice = coleccionTutorias.indexOf(tutoria);
 
-		if (!tamanoSuperado(indice)) {
-			desplazarUnaPosicionHaciaIzquierda(indice);
-		} else {
+		if (indice == -1) {
 			throw new OperationNotSupportedException("ERROR: No existe ninguna tutoría con ese identificador.");
+		} else {
+			coleccionTutorias.remove(indice);
 		}
 
 	}
 
-	public int getCapacidad() {
-		return capacidad;
-	}
+	public List<Tutoria> get(Profesor profesor) {
 
-	public int getTamano() {
-		return tamano;
-	}
+		if (profesor == null) {
+			throw new NullPointerException("ERROR: El profesor no puede ser nulo.");
+		}
 
-	public Tutoria[] get(Profesor profesor) {
-		int j = 0;
-		Tutoria[] copiaTutoriasProfesor = new Tutoria[tamano];
-		for (int i = 0; i < tamano; i++) {
-			if (coleccionTutorias[i].getProfesor().equals(profesor)) {
-				copiaTutoriasProfesor[j] = new Tutoria(coleccionTutorias[i]);
-				j++;
+		List<Tutoria> copiaTutoriasProfesor = new ArrayList<>();
+
+		for (Tutoria tutoria : coleccionTutorias) {
+			if (tutoria.getProfesor().equals(profesor)) {
+				copiaTutoriasProfesor.add(new Tutoria(tutoria));
 			}
 		}
+		copiaTutoriasProfesor.sort(Comparator.comparing(Tutoria::getNombre));
 		return copiaTutoriasProfesor;
 
 	}
 
-	public Tutoria[] get() {
-		return copiaProfundaTutorias();
+	public List<Tutoria> get() {
+		List<Tutoria> tutoriasOrdenadas = copiaProfundaTutorias();
+		Comparator<Profesor> comparadorProfesor = Comparator.comparing(Profesor::getDni);
+		tutoriasOrdenadas.sort(Comparator.comparing(Tutoria::getProfesor, comparadorProfesor).thenComparing(Tutoria::getNombre));
+		return tutoriasOrdenadas;
 	}
 
 }

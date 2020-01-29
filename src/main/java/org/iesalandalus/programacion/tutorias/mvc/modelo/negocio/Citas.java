@@ -1,55 +1,36 @@
 package org.iesalandalus.programacion.tutorias.mvc.modelo.negocio;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 import javax.naming.OperationNotSupportedException;
 
 import org.iesalandalus.programacion.tutorias.mvc.modelo.dominio.Alumno;
 import org.iesalandalus.programacion.tutorias.mvc.modelo.dominio.Cita;
+import org.iesalandalus.programacion.tutorias.mvc.modelo.dominio.Profesor;
 import org.iesalandalus.programacion.tutorias.mvc.modelo.dominio.Sesion;
+import org.iesalandalus.programacion.tutorias.mvc.modelo.dominio.Tutoria;
 
 public class Citas {
-	private int capacidad;
-	private int tamano;
-	private Cita[] coleccionCitas;
 
-	public Citas(int capacidad) {
-		if (capacidad <= 0) {
-			throw new IllegalArgumentException("ERROR: La capacidad debe ser mayor que cero.");
-		}
-		coleccionCitas = new Cita[capacidad];
-		this.capacidad = capacidad;
-		tamano = 0;
-	}
+	private List<Cita> coleccionCitas;
 
-	private boolean capacidadSuperada(int indice) {
-		return indice >= capacidad;
+	public Citas() {
+
+		coleccionCitas = new ArrayList<>();
 
 	}
 
-	private boolean tamanoSuperado(int indice) {
-		return indice >= tamano;
-
+	public int getTamano() {
+		return coleccionCitas.size();
 	}
 
-	private int buscarIndice(Cita cita) {
-		int indice = 0;
-		boolean citaEncontrada = false;
-		while (!tamanoSuperado(indice) && !citaEncontrada) {
-			if (coleccionCitas[indice].equals(cita)) {
-				citaEncontrada = true;
-			} else {
-				indice++;
-			}
-		}
-		return indice;
+	private List<Cita> copiaProfundaCitas() {
+		List<Cita> copiaCitas = new ArrayList<>();
 
-	}
-
-	private Cita[] copiaProfundaCitas() {
-		Cita[] copiaCitas = new Cita[coleccionCitas.length];
-		for (int i = 0; i < coleccionCitas.length && coleccionCitas[i] != null; i++) {
-
-			copiaCitas[i] = new Cita(coleccionCitas[i]);
-
+		for (Cita cita : coleccionCitas) {
+			copiaCitas.add(new Cita(cita));
 		}
 
 		return copiaCitas;
@@ -61,14 +42,10 @@ public class Citas {
 			throw new NullPointerException("ERROR: No se puede insertar una cita nula.");
 		}
 
-		int indice = buscarIndice(cita);
-		if (capacidadSuperada(indice)) {
-			throw new OperationNotSupportedException("ERROR: No se aceptan más citas.");
-		}
+		int indice = coleccionCitas.indexOf(cita);
+		if (indice == -1) {
+			coleccionCitas.add(new Cita(cita));
 
-		if (tamanoSuperado(indice)) {
-			coleccionCitas[indice] = new Cita(cita);
-			tamano++;
 		} else {
 			throw new OperationNotSupportedException("ERROR: Ya existe una cita con esa hora.");
 		}
@@ -79,84 +56,75 @@ public class Citas {
 		if (cita == null) {
 			throw new IllegalArgumentException("ERROR: No se puede buscar una cita nula.");
 		}
-		int indice = buscarIndice(cita);
-		if (tamanoSuperado(indice)) {
-			cita = null;
+		int indice = coleccionCitas.indexOf(cita);
+		if (indice == -1) {
+			return null;
 		} else {
-			cita = new Cita(coleccionCitas[indice]);
+			return new Cita(coleccionCitas.get(indice));
 		}
 
-		return cita;
-
-	}
-
-	private void desplazarUnaPosicionHaciaIzquierda(int indice) {
-
-		for (int i = indice; !tamanoSuperado(i); i++) {
-			coleccionCitas[i] = coleccionCitas[i + 1];
-		}
-		tamano--;
 	}
 
 	public void borrar(Cita cita) throws OperationNotSupportedException {
 		if (cita == null) {
 			throw new IllegalArgumentException("ERROR: No se puede borrar una cita nula.");
 		}
-		int indice = buscarIndice(cita);
+		int indice = coleccionCitas.indexOf(cita);
 
-		if (!tamanoSuperado(indice)) {
-			desplazarUnaPosicionHaciaIzquierda(indice);
-		} else {
+		if (indice == -1) {
 			throw new OperationNotSupportedException("ERROR: No existe ninguna cita con esa hora.");
+		} else {
+			coleccionCitas.remove(indice);
 		}
 
 	}
 
-	public int getCapacidad() {
-		return capacidad;
-	}
-
-	public int getTamano() {
-		return tamano;
-	}
-
-	public Cita[] get(Sesion sesion) {
+	public List<Cita> get(Sesion sesion) {
 		if (sesion == null) {
 			throw new NullPointerException("ERROR: La sesión no puede ser nula.");
 		}
-		int j = 0;
-		Cita[] copiaCitasSesion = new Cita[tamano];
-		for (int i = 0; i < tamano; i++) {
-			if (coleccionCitas[i].getSesion().equals(sesion)) {
-				copiaCitasSesion[j] = new Cita(coleccionCitas[i]);
-				j++;
+		List<Cita> copiaCitasSesion = new ArrayList<>();
 
+		for (Cita cita : coleccionCitas) {
+			if (cita.getSesion().equals(sesion)) {
+				copiaCitasSesion.add(new Cita(cita));
 			}
 		}
+
+		copiaCitasSesion.sort(Comparator.comparing(Cita::getHora));
 
 		return copiaCitasSesion;
 
 	}
 
-	public Cita[] get(Alumno alumno) {
+	public List<Cita> get(Alumno alumno) {
 		if (alumno == null) {
 			throw new NullPointerException("ERROR: El alumno no puede ser nulo.");
 		}
-		int j = 0;
-		Cita[] copiaCitasAlumno = new Cita[tamano];
-		for (int i = 0; i < tamano; i++) {
-			if (coleccionCitas[i].getAlumno().equals(alumno)) {
-				copiaCitasAlumno[j] = new Cita(coleccionCitas[i]);
-				j++;
+		List<Cita> copiaCitasAlumno = new ArrayList<>();
+
+		for (Cita cita : coleccionCitas) {
+			if (cita.getAlumno().equals(alumno)) {
+				copiaCitasAlumno.add(new Cita(cita));
 			}
 		}
+
+		Comparator<Profesor> comparadorProfesor = Comparator.comparing(Profesor::getDni);
+		Comparator<Tutoria> comparadorTutoria = Comparator.comparing(Tutoria::getProfesor, comparadorProfesor).thenComparing(Tutoria::getNombre);
+		Comparator<Sesion> comparadorSesion = Comparator.comparing(Sesion::getTutoria,comparadorTutoria).thenComparing(Sesion::getFecha);
+		copiaCitasAlumno.sort(Comparator.comparing(Cita::getSesion, comparadorSesion).thenComparing(Cita::getHora));
 
 		return copiaCitasAlumno;
 
 	}
 
-	public Cita[] get() {
-		return copiaProfundaCitas();
+	public List<Cita> get() {
+		List<Cita> citasOrdenadas = copiaProfundaCitas();
+		Comparator<Profesor> comparadorProfesor = Comparator.comparing(Profesor::getDni);
+		Comparator<Tutoria> comparadorTutoria = Comparator.comparing(Tutoria::getProfesor, comparadorProfesor).thenComparing(Tutoria::getNombre);
+		Comparator<Sesion> comparadorSesion = Comparator.comparing(Sesion::getTutoria,comparadorTutoria).thenComparing(Sesion::getFecha);
+		citasOrdenadas.sort(Comparator.comparing(Cita::getSesion, comparadorSesion).thenComparing(Cita::getHora));
+		return citasOrdenadas;
 	}
 
 }
