@@ -2,6 +2,7 @@ package org.iesalandalus.programacion.tutorias.mvc.modelo.dominio;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 public class Cita {
 	public static final DateTimeFormatter FORMATO_HORA = DateTimeFormatter.ofPattern("HH:mm");
@@ -72,48 +73,31 @@ public class Cita {
 		this.alumno = new Alumno(alumno);
 	}
 
+
+
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((alumno == null) ? 0 : alumno.hashCode());
-		result = prime * result + ((hora == null) ? 0 : hora.hashCode());
-		result = prime * result + ((sesion == null) ? 0 : sesion.hashCode());
-		return result;
+		return Objects.hash(alumno, hora, sesion);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (!(obj instanceof Cita)) {
 			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		}
 		Cita other = (Cita) obj;
-		if (alumno == null) {
-			if (other.alumno != null)
-				return false;
-		} else if (!alumno.equals(other.alumno))
-			return false;
-		if (hora == null) {
-			if (other.hora != null)
-				return false;
-		} else if (!hora.equals(other.hora))
-			return false;
-		if (sesion == null) {
-			if (other.sesion != null)
-				return false;
-		} else if (!sesion.equals(other.sesion))
-			return false;
-		return true;
+		return Objects.equals(alumno, other.alumno) && Objects.equals(hora, other.hora)
+				&& Objects.equals(sesion, other.sesion);
 	}
 
 	@Override
 	public String toString() {
-		String mensaje = String.format("alumno=%s, sesion=%s, hora=%s", alumno.toString(), sesion.toString(),
+
+		return String.format("alumno=%s, sesion=%s, hora=%s", alumno.toString(), sesion.toString(),
 				getHora());
-		return mensaje;
 	}
 
 }

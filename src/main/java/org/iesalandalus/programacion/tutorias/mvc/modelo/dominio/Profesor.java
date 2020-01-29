@@ -1,5 +1,6 @@
 package org.iesalandalus.programacion.tutorias.mvc.modelo.dominio;
 
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -7,7 +8,9 @@ public class Profesor {
 	private static final String ER_NOMBRE = "([a-zA-ZÁÉÍÓÚáéíóú]+)(\\s+([a-zA-ZÁÉÍÓÚáéíóú]+))+";
 	private static final String ER_DNI = "([0-9]{8})([A-Za-z])";
 	private static final String ER_CORREO = "[(\\w\\.)+|(\\w)+]+@\\w+\\.\\w{2,3}";
-	private String nombre, dni, correo;
+	private String nombre;
+	private String dni;
+	private String correo;
 
 	public Profesor(String nombre, String dni, String correo) {
 		setNombre(nombre);
@@ -69,7 +72,7 @@ public class Profesor {
 		if (!dni.matches(ER_DNI)) {
 			throw new IllegalArgumentException("ERROR: El DNI no tiene un formato válido.");
 		}
-		if (comprobarLetraDni(dni) == false) {
+		if (!comprobarLetraDni(dni)) {
 			throw new IllegalArgumentException("ERROR: La letra del DNI no es correcta.");
 		}
 
@@ -121,49 +124,43 @@ public class Profesor {
 
 	}
 
+
+
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((dni == null) ? 0 : dni.hashCode());
-		return result;
+		return Objects.hash(dni);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (!(obj instanceof Profesor)) {
 			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		}
 		Profesor other = (Profesor) obj;
-		if (dni == null) {
-			if (other.dni != null)
-				return false;
-		} else if (!dni.equals(other.dni))
-			return false;
-		return true;
+		return Objects.equals(dni, other.dni);
 	}
 
 	private String getIniciales() {
 
-		String iniciales = "";
+		StringBuilder iniciales = new StringBuilder("");
 		String[] palabras = getNombre().split(" ");
 		for (int i = 0; i <= palabras.length - 1; i++) {
 
-			iniciales = iniciales + palabras[i].charAt(0);
+			iniciales.append(palabras[i].charAt(0));
 		}
 
-		return iniciales.toUpperCase();
+		return iniciales.toString().toUpperCase();
 
 	}
 
 	@Override
 	public String toString() {
-		String mensaje = String.format("nombre=%s (%s), DNI=%s, correo=%s", getNombre(), getIniciales(), getDni(),
+
+		return String.format("nombre=%s (%s), DNI=%s, correo=%s", getNombre(), getIniciales(), getDni(),
 				getCorreo());
-		return mensaje;
 	}
 
 }

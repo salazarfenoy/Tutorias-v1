@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 
 public class Sesion {
 	private static final LocalTime HORA_COMIENZO_CLASES = LocalTime.of(16, 00);
@@ -133,42 +134,30 @@ public class Sesion {
 		this.tutoria = new Tutoria(tutoria);
 	}
 
+
+
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((fecha == null) ? 0 : fecha.hashCode());
-		result = prime * result + ((tutoria == null) ? 0 : tutoria.hashCode());
-		return result;
+		return Objects.hash(fecha, tutoria);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
+		if (this == obj) {
 			return true;
-		if (obj == null)
+		}
+		if (!(obj instanceof Sesion)) {
 			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		}
 		Sesion other = (Sesion) obj;
-		if (fecha == null) {
-			if (other.fecha != null)
-				return false;
-		} else if (!fecha.equals(other.fecha))
-			return false;
-		if (tutoria == null) {
-			if (other.tutoria != null)
-				return false;
-		} else if (!tutoria.equals(other.tutoria))
-			return false;
-		return true;
+		return Objects.equals(fecha, other.fecha) && Objects.equals(tutoria, other.tutoria);
 	}
 
 	@Override
 	public String toString() {
-		String mensaje = String.format("tutoria=%s, fecha=%s, horaInicio=%s, horaFin=%s, minutosDuracion=%s",
+
+		return String.format("tutoria=%s, fecha=%s, horaInicio=%s, horaFin=%s, minutosDuracion=%s",
 				getTutoria(), getFecha().format(FORMATO_FECHA), getHoraInicio(), getHoraFin(), getMinutosDuracion());
-		return mensaje;
 	}
 
 }

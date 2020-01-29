@@ -181,7 +181,7 @@ public class Vista {
 				System.out.println(tutoria);
 			}
 		} else {
-			System.out.println("No hay tutorías que mostrar para dicho profesor.");
+			System.out.println("No hay tutorías que mostrar para ese profesor.");
 		}
 	}
 
@@ -198,7 +198,6 @@ public class Vista {
 	public void buscarSesion() {
 		Consola.mostrarCabecera("Buscar Sesión");
 		Sesion sesion;
-		;
 		try {
 			sesion = controlador.buscar(Consola.leerSesionFicticia());
 			String mensaje = (sesion != null) ? sesion.toString() : "No existe dicha sesión.";
@@ -238,7 +237,7 @@ public class Vista {
 				System.out.println(sesion);
 			}
 		} else {
-			System.out.println("No hay sesiones que mostrar.");
+			System.out.println("No hay sesiones que mostrar para esa tutoría.");
 		}
 	}
 
@@ -294,7 +293,7 @@ public class Vista {
 				System.out.println(cita);
 			}
 		} else {
-			System.out.println("No hay citas que mostrar.");
+			System.out.println("No hay citas que mostrar para esa sesión.");
 		}
 	}
 
@@ -306,7 +305,7 @@ public class Vista {
 				System.out.println(cita);
 			}
 		} else {
-			System.out.println("No hay citas que mostrar.");
+			System.out.println("No hay citas que mostrar para ese alumno.");
 		}
 	}
 }
